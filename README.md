@@ -1,8 +1,22 @@
-# React + Vite
+# react-component-file-viewer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Support preview image and pdf file in react.
 
-Currently, two official plugins are available:
+Start Up：
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+npm install
+npm run dev
+```
+
+
+Usage:
+
+```jsx
+export default () => (
+  <>
+    <FileViewer src="path/to/image" />
+    <FileViewer src="path/to/pdf" />
+  </>
+);
+```
