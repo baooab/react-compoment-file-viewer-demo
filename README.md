@@ -1,6 +1,7 @@
 # react-component-file-viewer
 
-Support preview image and pdf file in react.
+Support preview image and pdf file in react. Inspired by [rc-image](https://github.com/react-component/image/tree/master).
+
 
 Start Up：
 

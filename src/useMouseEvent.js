@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const WHEEL_MAX_SCALE_RATIO = 1
 const BASE_SCALE_RATIO = 1
@@ -13,8 +13,8 @@ export function useMouseEvent({
 
   const { x, y } = transform;
 
-  const [isMoving, setMoving] = useState(false);
-  const [isWheeling, setWheeling] = useState(false);
+  const [isMoving, setIsMoving] = useState(false);
+  const [isWheeling, setIsWheeling] = useState(false);
 
   const startPositionInfo = useRef({
     diffX: 0,
@@ -39,7 +39,7 @@ export function useMouseEvent({
       transformY: y,
     };
 
-    setMoving(true);
+    setIsMoving(true);
   };
 
   const onMouseMove = event => {
@@ -54,16 +54,16 @@ export function useMouseEvent({
   }
 
   const onMouseUp = () => {
-    setMoving(false);
+    setIsMoving(false);
   }
 
   const onWheel = (event) => {
     if (event.deltaY == 0) return;
 
-    setWheeling(true);
+    setIsWheeling(true);
     clearTimeout(isWheeling);
-    setWheeling(+setTimeout(() => {
-      setWheeling(false);
+    setIsWheeling(+setTimeout(() => {
+      setIsWheeling(false);
     }, 500))
 
     // Scale ratio depends on the deltaY size
@@ -78,24 +78,42 @@ export function useMouseEvent({
 
     const { top, left } = containerRef.current.getBoundingClientRect();
 
-
-    console.log('>>>>>> [useMouseEvent] onWheel', {
-      event,
-      containerRef: containerRef.current,
-      ratio,
-      top,
-      left
-    })
+    // console.log('>>>>>> [useMouseEvent] onWheel', {
+    //   event,
+    //   containerRef: containerRef.current,
+    //   ratio,
+    //   top,
+    //   left
+    // })
 
     dispatchZoomChange(ratio, event.clientX - left, event.clientY - top);
   };
 
+
+  useEffect(() => {
+    window.addEventListener('mouseup', onMouseUp)
+
+    return () => {
+      window.removeEventListener('mouseup', onMouseUp)
+    }
+  }, [x, y, isMoving])
+
+
+  // deal with scrollbar problem when zooming
+  useEffect(() => {
+    const originalOverfoww = document.body.style.overflow
+    if (isWheeling) {
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      document.body.style.overflow = originalOverfoww
+    }
+  }, [isWheeling])
+
   return {
     isMoving,
-    isWheeling,
     onWheel,
     onMouseDown,
     onMouseMove,
-    onMouseUp,
   }
 }

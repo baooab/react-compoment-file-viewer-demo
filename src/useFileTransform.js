@@ -11,7 +11,7 @@ const initialTransform = {
 const maxScale = 10;
 const minScale = 1;
 
-export function useImageTransform({ fileRef }) {
+export function useFileTransform({ fileRef }) {
   const frame = useRef(null);
   const queue = useRef([]);
   const [transform, setTransform] = useState(initialTransform);
@@ -62,7 +62,7 @@ export function useImageTransform({ fileRef }) {
       newRatio = newScale / transform.scale;
     }
 
-    console.log('>>>>>>', { isPdf, newScale, newRatio, centerX, centerY, innerWidth, innerHeight })
+    // console.log('>>>>>>', { isPdf, newScale, newRatio, centerX, centerY, innerWidth, innerHeight })
 
     /** Default center point scaling */
     const mergedCenterX = centerX ?? innerWidth / 2;

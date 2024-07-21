@@ -2,8 +2,8 @@
 import './FileViewer.css'
 
 import { useMouseEvent } from './useMouseEvent'
-import { useImageTransform } from './useImageTransform'
-import { useEffect, useRef, useState } from 'react'
+import { useFileTransform } from './useFileTransform.js'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 const BASE_SCALE_RATIO = 1
 const scaleStep = 0.5
@@ -21,15 +21,17 @@ export const FileViewer = ({ src, width, height }) => {
   const [dragWrapperSize, setDragWrapperSize] = useState(() => ({ width: 0, height: 0 }))
   const [fileSize, setFileSize] = useState(() => ({ width, height }))
 
-  const [isPdf] = useState(() => src.endsWith('.pdf'))
+  const isPdf = useMemo(() => {
+    return src.endsWith('.pdf')
+  }, [src])
 
   const [isReady, setIsReady] = useState(false)
 
   const [, setRefresh] = useState(0)
 
-  const { updateTransform, resetTransform, transform, dispatchZoomChange } = useImageTransform({ fileRef })
+  const { updateTransform, resetTransform, transform, dispatchZoomChange } = useFileTransform({ fileRef })
 
-  const { isMoving, isWheeling, onWheel, onMouseDown, onMouseMove, onMouseUp } = useMouseEvent({
+  const { isMoving, onWheel, onMouseDown, onMouseMove } = useMouseEvent({
     containerRef: fileViewerWrapperRef,
     dispatchZoomChange,
     transform,
@@ -66,24 +68,6 @@ export const FileViewer = ({ src, width, height }) => {
     }
   }, [fileRef.current])
 
-  // drag end
-  useEffect(() => {
-    document.documentElement.addEventListener('pointerup', onMouseUp)
-    return () => {
-      document.documentElement.removeEventListener('pointerup', onMouseUp)
-    }
-  }, [])
-
-  // deal with scrollbar problem when zooming
-  useEffect(() => {
-    const originalOverfoww = document.body.style.overflow
-    if (isWheeling) {
-      document.body.style.overflow = 'hidden'
-    }
-    return () => {
-      document.body.style.overflow = originalOverfoww
-    }
-  }, [isWheeling])
 
   // reset transform
   const onDoubleClick = () => {
@@ -140,7 +124,6 @@ export const FileViewer = ({ src, width, height }) => {
             />
         }
         <div className='xt-file-viewer-file-drag-wrapper'
-          tabIndex={-1}
           onMouseDown={onMouseDown}
           onMouseMove={onMouseMove}
           onWheel={onWheel}
@@ -155,15 +138,13 @@ export const FileViewer = ({ src, width, height }) => {
           }}>
           {
             isReady && (
-              <>
-                <button
-                  className='xt-file-viewer-file-annotation'
-                  style={{
-                    transform: 'translate3d(75px, 75px, 0)',
-                  }}>
-                  1
-                </button>
-              </>
+              <button
+                className='xt-file-viewer-file-annotation'
+                style={{
+                  transform: 'translate3d(75px, 75px, 0)',
+                }}>
+                1
+              </button>
             )
           }
 
