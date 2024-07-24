@@ -6,15 +6,15 @@ import { useFileTransform } from './useFileTransform.js'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 const BASE_SCALE_RATIO = 1
-const scaleStep = 0.5
-const minScale = 1
+const SCALE_STEP = 0.5
+const MIN_SCALE = 1
 
 import { PdfViewer } from './PdfViewer'
 import { ImgViewer } from './ImgViewer'
 import { useTouchEvent } from './useTouchEvent.ts'
 
 
-export const FileViewer = ({ src, width, height }) => {
+export const FileViewer = ({ src, width, height, type, points = [] }) => {
   const viewerRef = useRef(null)
   const fileRef = useRef(null)
   const fileViewerWrapperRef = useRef(null)
@@ -22,8 +22,8 @@ export const FileViewer = ({ src, width, height }) => {
   const [fileSize, setFileSize] = useState(() => ({ width, height }))
 
   const isPdf = useMemo(() => {
-    return src.endsWith('.pdf')
-  }, [src])
+    return type ? type === 'pdf' : src.endsWith('.pdf')
+  }, [type, src])
 
   const [isReady, setIsReady] = useState(false)
 
@@ -73,16 +73,16 @@ export const FileViewer = ({ src, width, height }) => {
 
   // reset transform
   const onDoubleClick = () => {
-    updateTransform({ x: 0, y: 0, scale: minScale });
+    updateTransform({ x: 0, y: 0, scale: MIN_SCALE });
   }
 
   // zoom in
   const onZoomIn = () => {
-    dispatchZoomChange(BASE_SCALE_RATIO + scaleStep);
+    dispatchZoomChange(BASE_SCALE_RATIO + SCALE_STEP);
   };
   // zoom out
   const onZoomOut = () => {
-    dispatchZoomChange(BASE_SCALE_RATIO / (BASE_SCALE_RATIO + scaleStep));
+    dispatchZoomChange(BASE_SCALE_RATIO / (BASE_SCALE_RATIO + SCALE_STEP));
   };
 
   const handleOnLoad = () => {
@@ -90,6 +90,28 @@ export const FileViewer = ({ src, width, height }) => {
     setRefresh(prevRefresh => prevRefresh + 1)
     // source is ready
     setIsReady(true)
+  }
+
+  const transformStyle = useMemo(() => {
+    return {
+      transform: `translate3d(${transform.x}px, ${transform.y}px, 0) scale3d(${transform.scale}, ${transform.scale}, 1)`,
+      transitionDuration: (isMoving || isTouching) && '0s',
+    }
+  }, [transform, isMoving, isTouching])
+
+  const renderAnnotations = (points) => {
+    return points.map((point) => {
+      return (
+        <button
+          key={`${point.x}-${point.y}`}
+          className='xt-file-viewer-file-annotation'
+          style={{
+            transform: `translate3d(${point.x}px, ${point.y}px, 0)`,
+          }}>
+          1
+        </button>
+      )
+    })
   }
 
   return (
@@ -106,10 +128,7 @@ export const FileViewer = ({ src, width, height }) => {
               src={src}
               width={fileSize.width}
               height={fileSize.height}
-              style={{
-                transform: `translate3d(${transform.x}px, ${transform.y}px, 0) scale3d(${transform.scale}, ${transform.scale}, 1)`,
-                transitionDuration: (isMoving || isTouching) && '0s',
-              }}
+              style={transformStyle}
               onLoad={handleOnLoad}
             />
             : <ImgViewer
@@ -118,10 +137,7 @@ export const FileViewer = ({ src, width, height }) => {
               src={src}
               width={fileSize.width}
               height={fileSize.height}
-              style={{
-                transform: `translate3d(${transform.x}px, ${transform.y}px, 0) scale3d(${transform.scale}, ${transform.scale}, 1)`,
-                transitionDuration: (isMoving || isTouching) && '0s',
-              }}
+              style={transformStyle}
               onLoad={handleOnLoad}
             />
         }
@@ -133,21 +149,12 @@ export const FileViewer = ({ src, width, height }) => {
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
           style={{
+            ...transformStyle,
             width: dragWrapperSize.width,
             height: dragWrapperSize.height,
-            transform: `translate3d(${transform.x}px, ${transform.y}px, 0) scale3d(${transform.scale}, ${transform.scale}, 1)`,
-            transitionDuration: (isMoving || isTouching) && '0s',
           }}>
           {
-            isReady && (
-              <button
-                className='xt-file-viewer-file-annotation'
-                style={{
-                  transform: 'translate3d(75px, 75px, 0)',
-                }}>
-                1
-              </button>
-            )
+            isReady && renderAnnotations(points)
           }
 
         </div>

@@ -39,13 +39,14 @@
   align-items: center;
   justify-content: center;
   position: absolute;
-  width: 16px;
-  height: 16px;
+  font-size: 20px;
+  width: 31px;
+  height: 31px;
+  border: 1px solid white;
   border-radius: 50%;
   color: white;
-  background-color: blue;
+  background-color: #2491F2;
   pointer-events: initial;
   user-select: none;
   cursor: pointer;
-  border-style: none;
 }
