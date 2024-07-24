@@ -29,7 +29,10 @@ export const FileViewer = ({ src, width, height }) => {
 
   const [, setRefresh] = useState(0)
 
-  const { updateTransform, resetTransform, transform, dispatchZoomChange } = useFileTransform({ fileRef })
+  const { updateTransform, resetTransform, transform, dispatchZoomChange } = useFileTransform({
+    containerRef: fileViewerWrapperRef,
+    fileRef,
+  })
 
   const { isMoving, onWheel, onMouseDown, onMouseMove } = useMouseEvent({
     containerRef: fileViewerWrapperRef,
@@ -37,7 +40,6 @@ export const FileViewer = ({ src, width, height }) => {
     transform,
     updateTransform
   })
-
 
   const { isTouching, onTouchStart, onTouchMove, onTouchEnd } = useTouchEvent({
     transform,
@@ -56,7 +58,7 @@ export const FileViewer = ({ src, width, height }) => {
         height: undefined
       })
     }
-  }, [viewerRef.current])
+  }, [fileRef.current, fileSize.width])
 
   // calc drag wrapper size after file load
   useEffect(() => {
